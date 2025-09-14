@@ -5,8 +5,12 @@ import bcrypt from "bcryptjs";
 export const signup = async (req, res) => {
   try {
     const { email, fullName, password } = req.body;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || !fullName || !password) {
       return res.status(400).json({ message: "All fields are required" });
+    }
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
     }
     if (password.length < 6) {
       return res
@@ -25,8 +29,8 @@ export const signup = async (req, res) => {
       password: hashedPassword,
     });
     if (newUser) {
-      generateToken(newUser._id, res);
       const savedUser = await newUser.save();
+      generateToken(newUser._id, res);
       res.status(201).json({
         _id: savedUser._id,
         email: savedUser.email,
